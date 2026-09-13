@@ -1,0 +1,524 @@
+    <!DOCTYPE html>
+    <html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Defense & Survival Game</title>
+        <style>
+            body, html {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background-color: #000;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                user-select: none;
+            }
+
+            #gameCanvas {
+                display: block;
+                width: 100vw;
+                height: 100vh;
+            }
+
+            /* TELA DE MENU PRINCIPAL */
+            #mainMenu {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-color: #030838;
+                z-index: 2000;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+            }
+
+            /* COLINAS DO FUNDO */
+            .hills-background {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 40%;
+                background-color: #4ef043;
+                z-index: 1;
+            }
+
+            .hill-1 {
+                position: absolute;
+                bottom: 40%;
+                left: -15%;
+                width: 70%;
+                height: 180px;
+                background-color: #08541a;
+                border-radius: 50% 50% 0 0;
+            }
+
+            .hill-2 {
+                position: absolute;
+                bottom: 40%;
+                left: 30%;
+                width: 60%;
+                height: 150px;
+                background-color: #08541a;
+                border-radius: 50% 50% 0 0;
+            }
+
+            .hill-3 {
+                position: absolute;
+                bottom: 40%;
+                right: -10%;
+                width: 50%;
+                height: 130px;
+                background-color: #08541a;
+                border-radius: 50% 50% 0 0;
+            }
+
+            /* CONTEÚDO CENTRAL DO MENU */
+            .menu-content {
+                position: relative;
+                z-index: 10;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 18px;
+                width: 100%;
+                max-width: 500px;
+            }
+
+            /* CAIXA DE TÍTULO */
+            .menu-title-box {
+                background-color: #d9d9d9;
+                color: #000;
+                padding: 22px 60px;
+                border-radius: 60px;
+                font-size: 32px;
+                font-weight: bold;
+                text-align: center;
+                text-decoration: underline;
+                margin-bottom: 25px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+                width: 80%;
+            }
+
+            /* BOTÕES OVAIS DO MENU */
+            .menu-btn {
+                background-color: #d9d9d9;
+                color: #000;
+                border: none;
+                padding: 12px 0;
+                width: 220px;
+                border-radius: 35px;
+                font-size: 22px;
+                font-weight: 500;
+                cursor: pointer;
+                text-align: center;
+                transition: transform 0.15s ease, background-color 0.2s ease;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            }
+
+            .menu-btn:hover {
+                background-color: #ffffff;
+                transform: scale(1.06);
+            }
+
+            .menu-btn:active {
+                transform: scale(0.98);
+            }
+
+            /* MODAIS SECUNDÁRIOS (COMO JOGAR / OPÇÕES / CRÉDITOS) */
+            .sub-modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 3000;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .sub-modal.active {
+                display: flex !important;
+            }
+
+            .sub-modal-box {
+                background: #161b26;
+                border: 2px solid #3cd4f3;
+                border-radius: 12px;
+                width: 85%;
+                max-width: 500px;
+                padding: 25px;
+                color: white;
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                box-shadow: 0 0 20px rgba(60, 212, 243, 0.3);
+            }
+
+            .sub-modal-title {
+                font-size: 24px;
+                font-weight: bold;
+                color: #3cd4f3;
+                border-bottom: 1px solid #2d3748;
+                padding-bottom: 8px;
+            }
+
+            .sub-modal-content {
+                font-size: 15px;
+                line-height: 1.6;
+                color: #e2e8f0;
+            }
+
+            .btn-close-sub {
+                align-self: flex-end;
+                background: #e74c3c;
+                color: white;
+                border: none;
+                padding: 8px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+                margin-top: 10px;
+            }
+
+            .btn-close-sub:hover {
+                background: #c0392b;
+            }
+
+            /* HUD DE RECURSOS */
+            #hud {
+                position: fixed;
+                top: 15px;
+                left: 15px;
+                background: rgba(15, 20, 35, 0.85);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 15px;
+                display: flex;
+                gap: 20px;
+                z-index: 100;
+                border: 2px solid #3cd4f3;
+                box-shadow: 0 0 10px rgba(60, 212, 243, 0.3);
+            }
+
+            /* HUD DE TEMPO */
+            #timeHud {
+                position: fixed;
+                top: 15px;
+                right: 15px;
+                background: rgba(15, 20, 35, 0.85);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: bold;
+                z-index: 100;
+                border: 2px solid #3cd4f3;
+                text-align: right;
+            }
+
+            .resource-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-weight: bold;
+            }
+
+            #noticeBox {
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.85);
+                color: #fff;
+                padding: 10px 24px;
+                border-radius: 20px;
+                font-size: 16px;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                z-index: 100;
+                border: 1px solid #3cd4f3;
+            }
+
+    /* MODAL DA MESA DE CRIAÇÃO */
+    .build-menu-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .build-menu-modal.active {
+        display: flex !important;
+    }
+
+    .build-menu-container {
+        background: #161b26;
+        border: 2px solid #3cd4f3;
+        border-radius: 12px;
+        width: 85%;
+        max-width: 700px;
+        max-height: 80vh;
+        padding: 20px;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        box-shadow: 0 0 20px rgba(60, 212, 243, 0.25);
+    }
+
+    /* NAVEGAÇÃO POR ABAS */
+    .tabs-container {
+        display: flex;
+        gap: 10px;
+        border-bottom: 1px solid #2d3748;
+        padding-bottom: 10px;
+    }
+
+    .tab-btn {
+        background: #252d3d;
+        border: 1px solid #3cd4f3;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s ease;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+        background: #3cd4f3;
+        color: #000000;
+    }
+
+    .building-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        max-height: 50vh;
+        overflow-y: auto;
+    }
+
+            .build-menu-modal.active {
+                display: flex !important;
+            }
+
+            .build-menu-container {
+                background: #161b26;
+                border: 2px solid #3cd4f3;
+                border-radius: 12px;
+                width: 85%;
+                max-width: 800px;
+                max-height: 80vh;
+                padding: 20px;
+                color: white;
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                box-shadow: 0 0 20px rgba(60, 212, 243, 0.2);
+            }
+
+            .category-tabs {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                border-bottom: 1px solid #2d3748;
+                padding-bottom: 10px;
+            }
+
+            .tab-btn {
+                background: #252d3d;
+                border: 1px solid #3cd4f3;
+                color: white;
+                padding: 8px 16px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: all 0.2s;
+            }
+
+            .tab-btn.active, .tab-btn:hover {
+                background: #3cd4f3;
+                color: #000;
+            }
+
+            .building-list {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 15px;
+                overflow-y: auto;
+                max-height: 50vh;
+                padding-right: 5px;
+            }
+
+            .building-card {
+                background: #212837;
+                border: 1px solid #3a455d;
+                border-radius: 8px;
+                padding: 12px;
+                cursor: pointer;
+                transition: transform 0.2s, border-color 0.2s;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .building-card:hover {
+                transform: translateY(-3px);
+                border-color: #3cd4f3;
+            }
+
+            .card-title {
+                font-weight: bold;
+                color: #3cd4f3;
+                font-size: 16px;
+            }
+
+            .card-desc {
+                font-size: 13px;
+                color: #a0aec0;
+            }
+
+            .card-cost-box {
+                font-size: 12px;
+                color: #e2e8f0;
+                background: rgba(0, 0, 0, 0.3);
+                padding: 6px;
+                border-radius: 4px;
+            }
+
+            .btn-back {
+                align-self: flex-end;
+                background: #e74c3c;
+                color: white;
+                border: none;
+                padding: 8px 18px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+
+            .btn-back:hover {
+                background: #c0392b;
+            }
+        </style>
+    </head>
+    <body>
+
+        <!-- TELA DE MENU INICIAL -->
+        <div id="mainMenu">
+            <div class="hill-1"></div>
+            <div class="hill-2"></div>
+            <div class="hill-3"></div>
+            <div class="hills-background"></div>
+
+            <div class="menu-content">
+                <div class="menu-title-box">Defense & Survival</div>
+                <button class="menu-btn" onclick="startPlayFromMenu()">jogar</button>
+                <button class="menu-btn" onclick="openSubModal('howToPlayModal')">como jogar</button>
+                <button class="menu-btn" onclick="openSubModal('optionsModal')">opções</button>
+                <button class="menu-btn" onclick="openSubModal('creditsModal')">créditos</button>
+            </div>
+        </div>
+
+        <!-- MODAL COMO JOGAR -->
+        <div id="howToPlayModal" class="sub-modal">
+            <div class="sub-modal-box">
+                <div class="sub-modal-title">Como Jogar</div>
+                <div class="sub-modal-content">
+                    <p><strong>Movimentação:</strong> Teclas W, A, S, D ou Setas.</p>
+                    <p><strong>Coletar Recursos:</strong> Aproxime-se de árvores/pedras e clique com o botão esquerdo ou pressione <strong>F</strong>.</p>
+                    <p><strong>Construir Defesas:</strong> Varia de acordo com a proximidade do centro (Base):</p>
+                    <ul>
+                        <li>Perto da Base: Pressione <strong>E</strong> para abrir o Menu de Construção.</li>
+                        <li>Selecione a estrutura e clique no chão para posicionar.</li>
+                    </ul>
+                    <p><strong>Objetivo:</strong> Sobreviva às ondas noturnas de robôs e proteja sua base!</p>
+                </div>
+                <button class="btn-close-sub" onclick="closeSubModal('howToPlayModal')">Voltar</button>
+            </div>
+        </div>
+
+        <!-- MODAL OPÇÕES -->
+        <div id="optionsModal" class="sub-modal">
+            <div class="sub-modal-box">
+                <div class="sub-modal-title">Opções</div>
+                <div class="sub-modal-content">
+                    <p>🔊 <strong>Efeitos Sonoros:</strong> Ativados</p>
+                    <p>🎵 <strong>Música de Fundo:</strong> Ativada</p>
+                    <p>🖥️ <strong>Resolução:</strong> Adaptável (Tela Cheia)</p>
+                </div>
+                <button class="btn-close-sub" onclick="closeSubModal('optionsModal')">Voltar</button>
+            </div>
+        </div>
+
+        <!-- MODAL CRÉDITOS -->
+        <div id="creditsModal" class="sub-modal">
+            <div class="sub-modal-box">
+                <div class="sub-modal-title">Créditos</div>
+                <div class="sub-modal-content">
+                    <p><strong>Desenvolvimento:</strong>Douglas e IA</p>
+                    <p><strong>Engine:</strong>Maquina do senai e not da Acer</p>
+                    <p><strong>Design & Estilo:</strong>Felipe e vinicius</p>
+                </div>
+                <button class="btn-close-sub" onclick="closeSubModal('creditsModal')">Voltar</button>
+            </div>
+        </div>
+
+        <!-- HUD DE RECURSOS -->
+        <div id="hud">
+            <div class="resource-item">🪵 Madeira: <span id="woodText">60</span></div>
+            <div class="resource-item">🪨 Pedra: <span id="stoneText">40</span></div>
+            <div class="resource-item">🍎 Frutas: <span id="berryText">10</span></div>
+            <div class="resource-item">⚫ Carvão: <span id="coalText">0</span></div>
+            <div class="resource-item">🪙 Ouro: <span id="goldText">0</span></div>
+            <div class="resource-item">🧵 Linha: <span id="stringText">0</span></div>
+        </div>
+
+        <!-- HUD DE TEMPO -->
+        <div id="timeHud">
+            <div id="phaseText" style="color: #f1c40f;">☀️ Dia 1</div>
+            <div id="timerText" style="font-size: 13px; color: #ccc;">01:00</div>
+        </div>
+
+        <div id="noticeBox"></div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        
+    <!-- MODAL MESA DE CRIAÇÃO -->
+    <div id="buildMenu" class="build-menu-modal">
+        <div class="build-menu-container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="color: #3cd4f3; margin: 0; font-size: 22px;">🛠️ Mesa de Criação</h2>
+                <button class="btn-back" onclick="closeBuildMenu()">✕</button>
+            </div>
+
+            <!-- BARRA DE ABAS -->
+            <div class="tabs-container">
+                <button class="tab-btn active" onclick="filterCategory('ferramentas', event)">🪓 Ferramentas</button>
+                <button class="tab-btn" onclick="filterCategory('normais', event)">🏰 Construções</button>
+            </div>
+
+            <!-- LISTA DE ITENS DA ABA SELECIONADA -->
+            <div id="buildingList" class="building-grid"></div>
+        </div>
+    </div>
+
+        <script src="game.js"></script>
+    </body>
+    </html> 
